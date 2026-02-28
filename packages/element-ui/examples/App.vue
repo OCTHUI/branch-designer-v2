@@ -1,25 +1,9 @@
 <template>
     <div id="app">
-        <div class="_fc-top">
-            <div v-if="topImg" @click="goPro" class="js-top-img top_img"
-                 style="background: url('https://static.form-create.com/file/img/top2.jpg');height: 60px;background-repeat: no-repeat;background-size: cover;background-position: center;">
-                <div class="container pos">
-                    <div class="close" @click.stop="topImg = false">X</div>
-                </div>
-            </div>
-            <div class="_fc-top-nav">
-                <div class="_fc-top-copyright">
-                    <img class="_fc-t-logo" src="http://form-create.com/logo.png" alt="logo"/>
-                    <div class="_fc-t-name"><span>FcDesigner | <span style="font-size: 14px;">Element Plus 开源版</span></span></div>
-                </div>
-                <div class="_fc-top-link">
-                    <a href="https://form-create.com/" target="_blank" class="item">官网</a>
-                    <a href="https://form-create.com/v3/mobile" class="item">移动端设计器</a>
-                    <a href="https://pro.form-create.com/view" class="item pro-version">高级版🔥</a>
-                    <a href="https://view.form-create.com/" target="_blank" class="item">文档</a>
-                    <a href="https://form-create.com/designer" target="_blank" class="item">Vue2版本</a>
-                    <a href="https://github.com/xaboy/form-create-designer" target="_blank" class="item">查看源码</a>
-                </div>
+        <div class="_fc-top-bar">
+            <div class="_fc-top-logo">
+                <img class="_fc-logo-img" src="../src/style/images/hsg_logo.png" alt="logo"/>
+                <span class="_fc-logo-text">Branch Designer V2.0</span>
             </div>
         </div>
         <fc-designer ref="designer" :config="config" :handle="handle" :locale="locale">
@@ -58,34 +42,15 @@
             </template>
         </fc-designer>
 
-        <ElFooter class="_fc-copyright" height="30px">
-            <div class="_fc-b-item">
-                <iframe
-                    src="https://ghbtns.com/github-btn.html?user=xaboy&repo=form-create-designer&type=star&count=true"
-                    frameborder="0" scrolling="0" width="120" height="21" title="GitHub"></iframe>
-            </div>
-            <span style="margin: 0 10px;">|</span>
-            <div class="_fc-b-item">
-                <a href='https://gitee.com/xaboy/form-create-designer' target="_blank"
-                   style="display: inline-flex;"><img
-                    src='https://gitee.com/xaboy/form-create-designer/badge/star.svg?theme=dark' alt='gitee'/></a>
-            </div>
-            <span style="margin: 0 10px;">|</span>
-            <div class="_fc-b-item">
-                <a href="https://github.com/xaboy/form-create-designer" target="_blank" style="display: inline-flex;">
-                    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="mit"/>
-                </a>
-            </div>
-        </ElFooter>
 
         <el-dialog :title="title[type]" v-model="state" class="_fc-t-dialog">
             <div ref="editor" v-if="state"></div>
             <span style="color: red;" v-if="err">输入内容格式有误!</span>
             <template #footer v-if="type > 2">
                 <span slot="footer" class="dialog-footer">
-            <el-button @click="state = false" size="small">取 消</el-button>
-            <el-button type="primary" @click="onOk" size="small">确 定</el-button>
-          </span>
+                    <el-button @click="state = false" size="small">取 消</el-button>
+                    <el-button type="primary" @click="onOk" size="small">确 定</el-button>
+                </span>
             </template>
         </el-dialog>
         <ConfigPanel :menus="menus" @change="panelChange"></ConfigPanel>
@@ -148,7 +113,6 @@ export default {
             locale: null,
             menus: [],
             hashData,
-            topImg: true,
             config: {
                 autoActive: true,
                 fieldReadonly: false,
@@ -176,9 +140,6 @@ export default {
         }
     },
     methods: {
-        goPro() {
-            location.href = 'https://pro.form-create.com/view';
-        },
         panelChange(config) {
             if (config.locale === 'en') {
                 this.locale = En;
@@ -437,94 +398,22 @@ export default {
 </script>
 
 <style>
-._fc-top {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: #282828;
-    position: relative;
-    cursor: default;
-}
 
 :focus-visible {
     outline: 0 none;
 }
 
-.top_img {
-    cursor: pointer;
-}
 
-._fc-top .close {
-    position: absolute;
-    right: 15px;
-    top: 6px;
-    color: #FFFFFF;
-    background-color: #c6c6c652;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 25px;
-    cursor: pointer;
-}
 
-._fc-top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 20px;
-}
 
-._fc-top-copyright {
-    display: flex;
-    align-items: center;
-}
 
-._fc-top-link {
-}
 
-._fc-top a {
-    height: 35px;
-    font-size: 14px;
-    line-height: 35px;
-    color: #aaa;
-    text-decoration: none;
-}
 
-._fc-top a + a {
-    margin-left: 20px;
-}
 
-._fc-t-header {
-    height: 60px;
-    margin: 0 20px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    cursor: default;
-}
 
-._fc-t-logo {
-    height: 26px;
-}
 
-._fc-t-name {
-    display: inline-block;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 600;
-    margin-left: 5px;
-}
 
-._fc-t-menu {
-    position: absolute;
-    right: 0;
-}
 
-._fc-t-menu i {
-    font-size: 12px;
-}
 
 .handle {
     display: flex;
@@ -546,6 +435,7 @@ body {
     margin: 0;
     display: flex !important;
     flex-direction: column !important;
+    background-color: #f5f5f5;
 }
 
 #app {
@@ -554,16 +444,6 @@ body {
     flex: 1;
 }
 
-._fc-copyright {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0 20px;
-    font-size: 16px;
-    border-top: 1px solid #ECECEC;
-    background-color: #fff;
-    cursor: pointer;
-}
 
 ._fc-t-dialog .CodeMirror {
     height: 450px;
@@ -582,9 +462,6 @@ body {
     padding: 0px 20px;
 }
 
-._fc-b-item {
-    display: flex;
-}
 
 ._fc-zz {
     background-image: -webkit-linear-gradient(left, #cd7f32, #d81159 10%, #ffbc42 20%, #75d701 30%, #30a9de 40%, #d81159 60%, #ffbc42 70%, #75d701 80%, #30a9de 90%, #cd7f32);
@@ -692,5 +569,36 @@ body {
 
 ._fd-view-product > div > span {
     font-size: 14px;
+}
+
+._fc-top-bar {
+    width: 100%;
+    height: 50px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-bottom: 1px solid #e8e8e8;
+}
+
+._fc-top-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+._fc-logo-img {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
+}
+
+._fc-logo-text {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 </style>
