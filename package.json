@@ -4,8 +4,7 @@
     "description": "FormCreate低代码可视化表单设计器",
     "scripts": {
         "dev:ele": "lerna run dev --scope=@form-create/designer",
-        "dev:vant": "lerna run dev --scope=@form-create/vant-designer",
-        "dev:antd": "lerna run dev --scope=@form-create/antd-designer",
+        "dev": "pnpm dev:ele",
         "build": "lerna run build",
         "build:locale": "lerna run build:locale",
         "build:preview": "lerna run build:preview"

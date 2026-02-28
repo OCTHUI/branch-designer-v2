@@ -595,10 +595,13 @@ body {
 }
 
 ._fc-logo-text {
-    color: #ffffff;
+    color: #5B4FA8;
     font-size: 18px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 </style>
