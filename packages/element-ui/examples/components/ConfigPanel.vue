@@ -24,6 +24,35 @@
                         </div>
                     </template>
                 </div>
+                
+                <!-- 批量导入词条 -->
+                <div class="section-header" style="margin-top: 20px;">
+                    <span class="section-title">批量导入词条</span>
+                </div>
+                <div class="import-section">
+                    <div class="import-description">
+                        <i class="fc-icon icon-question"></i>
+                        <span>支持导入 public_page.ts 文件格式的国际化词条</span>
+                    </div>
+                    <div class="import-block">
+                        <div class="import-row">
+                            <el-select v-model="importLocale" placeholder="选择目标语言" size="default" style="width: 150px;">
+                                <el-option label="中文" value="zh-cn"></el-option>
+                                <el-option label="英文" value="en"></el-option>
+                            </el-select>
+                            <el-button type="primary" size="default" @click="importFromPublicPage" :loading="importing">
+                                <i class="fc-icon icon-group"></i> 导入 public_page.ts
+                            </el-button>
+                        </div>
+                        <div class="import-tips">
+                            <span>提示：将从 /packages/element-ui/src/locale/page/ 目录读取对应语言的文件</span>
+                        </div>
+                    </div>
+                    <div v-if="importResult.show" class="import-result" :class="importResult.type">
+                        <i :class="importResult.type === 'success' ? 'fc-icon icon-success' : 'fc-icon icon-error'"></i>
+                        <span>{{ importResult.message }}</span>
+                    </div>
+                </div>
                 <div class="section-header">
                     <span class="section-title">功能设置 <a href="https://view.form-create.com/hidden-item" target="_blank"><i class="fc-icon icon-question"></i></a></span>
                 </div>
@@ -307,6 +336,13 @@ export default defineComponent({
                 fieldReadonly: false,
                 showSaveBtn: true,
             },
+            importLocale: 'zh-cn',
+            importing: false,
+            importResult: {
+                show: false,
+                type: 'success',
+                message: ''
+            },
             defaultFeature: {
                 hotKey: true,
                 autoResetName: true,
@@ -463,6 +499,86 @@ export default defineComponent({
         },
         copy() {
             copyTextToClipboard(toJSON(this.getConfig()));
+        },
+        async importFromPublicPage() {
+            this.importing = true;
+            this.importResult.show = false;
+            
+            try {
+                // 根据选择的语言加载对应的文件
+                const fileName = this.importLocale === 'zh-cn' ? 'zh-CN/public_page.ts' : 'en-US/public_page.ts';
+                const response = await fetch(`../src/locale/page/${fileName}`);
+                
+                if (!response.ok) {
+                    throw new Error('文件加载失败');
+                }
+                
+                const content = await response.text();
+                
+                // 解析 TS 文件中的键值对
+                const pairs = this.parseTsFile(content);
+                
+                if (pairs.length === 0) {
+                    this.showImportResult('error', '未找到有效的词条');
+                    return;
+                }
+                
+                // 获取设计器实例并导入词条
+                const designer = this.$parent.$refs.designer;
+                if (!designer) {
+                    this.showImportResult('error', '未找到设计器实例');
+                    return;
+                }
+                
+                // 获取当前的 language 配置
+                const currentOptions = designer.getOptions();
+                const currentLanguage = currentOptions.language || {};
+                
+                // 合并新词条
+                if (!currentLanguage[this.importLocale]) {
+                    currentLanguage[this.importLocale] = {};
+                }
+                
+                pairs.forEach(([key, value]) => {
+                    currentLanguage[this.importLocale][key] = value;
+                });
+                
+                // 应用新的配置
+                designer.setOption({
+                    language: currentLanguage
+                });
+                
+                this.showImportResult('success', `成功导入 ${pairs.length} 个词条到${this.importLocale === 'zh-cn' ? '中文' : '英文'}`);
+                
+            } catch (error) {
+                console.error('导入失败:', error);
+                this.showImportResult('error', '导入失败：' + error.message);
+            } finally {
+                this.importing = false;
+            }
+        },
+        parseTsFile(content) {
+            const pairs = [];
+            const regex = /^  ([A-Z_0-9]+):\s*'([^']+)'/gm;
+            let match;
+            
+            while ((match = regex.exec(content)) !== null) {
+                pairs.push([match[1], match[2]]);
+            }
+            
+            return pairs;
+        },
+        showImportResult(type, message) {
+            this.importResult = {
+                show: true,
+                type: type,
+                message: message
+            };
+            
+            // 5 秒后自动隐藏
+            setTimeout(() => {
+                this.importResult.show = false;
+            }, 5000);
         }
     }
 });
@@ -761,6 +877,73 @@ export default defineComponent({
     margin-top: 16px;
     display: inline-flex;
     align-items: center;
+}
+
+.import-section {
+    padding: 16px;
+    background-color: #f5f7fa;
+    border-radius: 4px;
+    margin-top: 12px;
+}
+
+.import-description {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #606266;
+}
+
+.import-description i {
+    color: #2E73FF;
+}
+
+.import-block {
+    background-color: #ffffff;
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid #e4e7ed;
+}
+
+.import-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.import-tips {
+    font-size: 12px;
+    color: #909399;
+    padding-top: 8px;
+    border-top: 1px solid #ebeef5;
+}
+
+.import-result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.import-result.success {
+    background-color: #f0f9eb;
+    color: #67c23a;
+    border: 1px solid #e1f3d8;
+}
+
+.import-result.error {
+    background-color: #fef0f0;
+    color: #f56c6c;
+    border: 1px solid #fde2e2;
+}
+
+.import-result i {
+    font-size: 16px;
 }
 
 .setting-item {
