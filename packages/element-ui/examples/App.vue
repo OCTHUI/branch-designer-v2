@@ -88,12 +88,24 @@ const translations = {
     cn: {
         'language.import': '导入',
         'language.export': '导出',
-        'language.exportPreviewUrl': '导出预览 URL'
+        'language.exportPreviewUrl': '导出预览 URL',
+        'language.importJson': '导入 JSON',
+        'language.importOptions': '导入 Options',
+        'language.exportJson': '生成 JSON',
+        'language.exportOptions': '生成 Options',
+        'language.batchImport': '批量导入',
+        'language.batchRemove': '批量删除'
     },
     en: {
         'language.import': 'Import',
         'language.export': 'Export',
-        'language.exportPreviewUrl': 'Export Preview URL'
+        'language.exportPreviewUrl': 'Export Preview URL',
+        'language.importJson': 'Import JSON',
+        'language.importOptions': 'Import Options',
+        'language.exportJson': 'Generate JSON',
+        'language.exportOptions': 'Generate Options',
+        'language.batchImport': 'Batch Import',
+        'language.batchRemove': 'Batch Remove'
     }
 };
 
