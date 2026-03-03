@@ -26,15 +26,15 @@
                 ></el-alert>
                 
                 <el-form label-width="100px">
-                    <el-form-item label="目标语言">
-                        <el-select v-model="importLocale" placeholder="请选择" style="width: 100%;">
+                    <el-form-item :label="t('language.targetLanguage')">
+                        <el-select v-model="importLocale" :placeholder="t('language.pleaseSelect')" style="width: 100%;">
                             <template v-for="item in localeOptions" :key="item.value">
                                 <el-option :label="item.label" :value="item.value"></el-option>
                             </template>
                         </el-select>
                     </el-form-item>
                     
-                    <el-form-item label="上传文件">
+                    <el-form-item :label="t('language.uploadFile')">
                         <input 
                             type="file" 
                             ref="fileInput"
@@ -46,20 +46,20 @@
                     
                     <div v-if="importPreview.length > 0" class="_fd-import-preview">
                         <div class="_fd-import-preview-title">
-                            预览（前 5 条）：共 {{ importPreview.total }} 个词条
+                            {{ t('language.importPreview') }}: {{ importPreview.total }} {{ t('language.entries') }}
                         </div>
                         <el-table :data="importPreview.items" size="small" border>
                             <el-table-column prop="key" label="Key" width="120"></el-table-column>
-                            <el-table-column prop="value" :label="importLocale === 'zh-cn' ? '简体中文' : 'English'"></el-table-column>
+                            <el-table-column prop="value" :label="importLocale === 'zh-cn' ? t('language.simplifiedChinese') : t('language.english')"></el-table-column>
                         </el-table>
                     </div>
                 </el-form>
             </div>
             
             <template #footer>
-                <el-button size="small" @click="importDialogVisible = false">取消</el-button>
+                <el-button size="small" @click="importDialogVisible = false">{{ t('language.cancel') }}</el-button>
                 <el-button size="small" type="primary" @click="confirmImport" :loading="importing">
-                    导入
+                    {{ t('language.import') }}
                 </el-button>
             </template>
         </el-dialog>
