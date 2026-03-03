@@ -5,13 +5,29 @@
             {{ t('warning.language') }}
         </div>
         <div class="_fd-lc-header">
-            <el-button size="small" @click="addColumn">{{ t('language.add') }}</el-button>
-            <el-button size="small" @click="openImportDialog">
-                <i class="fc-icon icon-group"></i> {{ t('language.batchImport') }}
-            </el-button>
-            <el-button size="small" type="danger" plain :disabled="!selected.length" @click="batchRmColumn">
-                {{ t('language.batchRemove') }}
-            </el-button>
+            <div class="_fd-lc-header-left">
+                <el-button size="small" @click="addColumn">{{ t('language.add') }}</el-button>
+                <el-button size="small" @click="openImportDialog">
+                    <i class="fc-icon icon-group"></i> {{ t('language.batchImport') }}
+                </el-button>
+                <el-button size="small" type="danger" plain :disabled="!selected.length" @click="batchRmColumn">
+                    {{ t('language.batchRemove') }}
+                </el-button>
+            </div>
+            <div class="_fd-lc-header-right">
+                <el-input
+                    v-model="searchText"
+                    :placeholder="t('language.searchPlaceholder')"
+                    size="small"
+                    clearable
+                    style="width: 200px;"
+                    @input="handleSearch"
+                >
+                    <template #prefix>
+                        <i class="el-icon-search"></i>
+                    </template>
+                </el-input>
+            </div>
         </div>
         
         <!-- 批量导入对话框 -->
@@ -147,7 +163,9 @@ export default defineComponent({
             persistError: null,
             // 分页
             currentPage: 1,
-            pageSize: 50
+            pageSize: 50,
+            // 搜索
+            searchText: ''
         }
     },
     computed: {
@@ -160,14 +178,35 @@ export default defineComponent({
         t() {
             return this.designer.setupState.t;
         },
-        // 分页数据
+        // 搜索过滤后的数据
+        filteredColumn() {
+            if (!this.searchText) {
+                return this.column;
+            }
+            const search = this.searchText.toLowerCase();
+            return this.column.filter(row => {
+                // 搜索 Key
+                if (row.key.toLowerCase().includes(search)) {
+                    return true;
+                }
+                // 搜索所有语言的值
+                for (const lang of this.localeOptions.map(o => o.value)) {
+                    const value = row[lang] || '';
+                    if (value.toLowerCase().includes(search)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        },
+        // 分页数据（基于过滤后的数据）
         paginatedData() {
             const start = (this.currentPage - 1) * this.pageSize;
             const end = start + this.pageSize;
-            return this.column.slice(start, end);
+            return this.filteredColumn.slice(start, end);
         },
         totalEntries() {
-            return this.column.length;
+            return this.filteredColumn.length;
         }
     },
     methods: {
@@ -402,6 +441,11 @@ export default defineComponent({
         handleCurrentChange(val) {
             this.currentPage = val;
         },
+        // 搜索处理
+        handleSearch() {
+            // 搜索时重置到第一页
+            this.currentPage = 1;
+        },
         async saveColumn(row, input) {
             row.input = input || false;
             const language = this.designer.setupState.formOptions.language;
@@ -515,8 +559,19 @@ export default defineComponent({
 
 ._fd-lc-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
+}
+
+._fd-lc-header-left {
+    display: flex;
+    gap: 8px;
+}
+
+._fd-lc-header-right {
+    display: flex;
+    align-items: center;
 }
 
 ._fd-language-config .el-table__cell {

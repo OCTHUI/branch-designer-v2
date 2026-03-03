@@ -323,6 +323,7 @@ const En = {
         english: 'English',
         cancel: 'Cancel',
         pageTotal: '{total} entries',
+        searchPlaceholder: 'Search Key or translation',
         select: 'Select language',
     },
     menu: {
