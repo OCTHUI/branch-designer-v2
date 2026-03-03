@@ -1,0 +1,17 @@
+{
+  "name": "@form-create/locale-server",
+  "version": "1.0.0",
+  "description": "国际化配置持久化服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": ["i18n", "locale", "form-create"],
+  "author": "",
+  "license": "MIT"
+}

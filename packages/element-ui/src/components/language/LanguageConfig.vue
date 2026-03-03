@@ -100,6 +100,9 @@
 import {defineComponent} from 'vue';
 import {copyTextToClipboard} from '../../utils';
 
+// 后端 API 基础地址
+const API_BASE = 'http://localhost:3080/api';
+
 export default defineComponent({
     name: 'LanguageConfig',
     inject: ['designer'],
@@ -126,18 +129,139 @@ export default defineComponent({
                 items: [],
                 total: 0
             },
-            importData: []
+            importData: [],
+            persistEnabled: false,
+            persistError: null
         }
     },
     methods: {
+        /**
+         * 从后端加载语言包
+         */
+        async loadLocale() {
+            try {
+                const response = await fetch(`${API_BASE}/locale`);
+                if (!response.ok) throw new Error('加载失败');
+                const data = await response.json();
+                
+                // 合并到 formOptions
+                const formOptions = this.designer.setupState.formOptions;
+                if (!formOptions.language) {
+                    formOptions.language = {};
+                }
+                
+                // 合并自定义语言包
+                Object.keys(data).forEach(lang => {
+                    if (!formOptions.language[lang]) {
+                        formOptions.language[lang] = {};
+                    }
+                    Object.assign(formOptions.language[lang], data[lang]);
+                });
+                
+                this.persistEnabled = true;
+                this.refreshColumn();
+                console.log('🌍 语言包已从文件加载');
+            } catch (error) {
+                console.warn('⚠️ 无法连接持久化服务，使用内存模式:', error.message);
+                this.persistEnabled = false;
+                this.persistError = error.message;
+                this.refreshColumn();
+            }
+        },
+        
+        /**
+         * 保存完整语言包
+         */
+        async saveLocale() {
+            if (!this.persistEnabled) return;
+            
+            try {
+                const language = this.designer.setupState.formOptions.language || {};
+                const response = await fetch(`${API_BASE}/locale`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(language)
+                });
+                
+                if (!response.ok) throw new Error('保存失败');
+                console.log('✅ 语言包已保存到文件');
+            } catch (error) {
+                console.error('❌ 保存语言包失败:', error.message);
+            }
+        },
+        
+        /**
+         * 更新单个词条
+         */
+        async updateLocaleEntry(lang, key, value) {
+            if (!this.persistEnabled) return;
+            
+            try {
+                await fetch(`${API_BASE}/locale/${encodeURIComponent(lang)}/${encodeURIComponent(key)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value })
+                });
+            } catch (error) {
+                console.error('更新词条失败:', error.message);
+            }
+        },
+        
+        /**
+         * 批量导入词条
+         */
+        async batchImportLocale(lang, entries) {
+            if (!this.persistEnabled) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/locale/${encodeURIComponent(lang)}/batch`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ entries })
+                });
+                
+                if (!response.ok) throw new Error('导入失败');
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('批量导入失败:', error.message);
+                return null;
+            }
+        },
+        
+        /**
+         * 批量删除词条
+         */
+        async batchDeleteLocale(lang, keys) {
+            if (!this.persistEnabled) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/locale/${encodeURIComponent(lang)}/batch`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keys })
+                });
+                
+                if (!response.ok) throw new Error('删除失败');
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('批量删除失败:', error.message);
+                return null;
+            }
+        },
+        
         copy(key) {
             copyTextToClipboard(key);
         },
-        addColumn() {
+        async addColumn() {
+            const newKey = this.randomString();
             this.column.unshift({
-                key: this.randomString(),
+                key: newKey,
                 input: true,
-            })
+            });
+            // 持久化：为每个语言添加空词条
+            await this.saveLocale();
         },
         openImportDialog() {
             this.importDialogVisible = true;
@@ -174,7 +298,7 @@ export default defineComponent({
                 total: pairs.length
             };
         },
-        confirmImport() {
+        async confirmImport() {
             if (this.importData.length === 0) {
                 this.$message.warning('请先选择文件');
                 return;
@@ -185,6 +309,31 @@ export default defineComponent({
                 language[this.importLocale] = {};
             }
             
+            // 持久化批量导入
+            if (this.persistEnabled) {
+                this.importing = true;
+                const entries = this.importData.map(item => ({
+                    key: item.key,
+                    value: item.value
+                }));
+                
+                const result = await this.batchImportLocale(this.importLocale, entries);
+                this.importing = false;
+                
+                if (result) {
+                    // 更新内存
+                    entries.forEach(({ key, value }) => {
+                        language[this.importLocale][key] = value;
+                    });
+                    
+                    this.refreshColumn();
+                    this.importDialogVisible = false;
+                    this.$message.success(`成功导入 ${result.count} 个新词条`);
+                    return;
+                }
+            }
+            
+            // 降级：仅内存模式
             let count = 0;
             this.importData.forEach(item => {
                 if (!language[this.importLocale][item.key]) {
@@ -197,7 +346,8 @@ export default defineComponent({
             this.refreshColumn();
             
             this.importDialogVisible = false;
-            this.$message.success(`成功导入 ${count} 个新词条`);
+            await this.saveLocale();
+            this.$message.success(`成功导入 ${count} 个新词条（内存模式）`);
         },
         refreshColumn() {
             const language = this.designer.setupState.formOptions.language || {};
@@ -212,30 +362,77 @@ export default defineComponent({
             });
             this.column = Object.values(column);
         },
-        saveColumn(row, input) {
+        async saveColumn(row, input) {
             row.input = input || false;
             const language = this.designer.setupState.formOptions.language;
+            
+            // 更新内存
             this.localeOptions.forEach(item => {
                 if (!language[item.value]) {
                     language[item.value] = {};
                 }
                 language[item.value][row.key] = row[item.value];
-            })
+                // 持久化单个词条
+                this.updateLocaleEntry(item.value, row.key, row[item.value]);
+            });
+            
+            // 全量保存作为备份
+            await this.saveLocale();
         },
-        rmColumn(idx) {
+        async rmColumn(idx) {
             const row = this.column[idx];
             this.column.splice(idx, 1);
             const language = this.designer.setupState.formOptions.language;
+            
+            // 收集要删除的 keys
+            const keysToDelete = [];
             this.localeOptions.forEach(item => {
                 if (language[item.value]) {
-                    delete language[item.value][row.key]
+                    delete language[item.value][row.key];
+                    keysToDelete.push(row.key);
                 }
-            })
-        },
-        batchRmColumn() {
-            this.selected.forEach(item => {
-                this.rmColumn(this.column.indexOf(item));
             });
+            
+            // 持久化删除
+            if (this.persistEnabled) {
+                await this.batchDeleteLocale('zh-cn', [row.key]);
+                await this.batchDeleteLocale('en', [row.key]);
+            }
+            await this.saveLocale();
+        },
+        async batchRmColumn() {
+            if (this.selected.length === 0) return;
+            
+            // 按语言收集要删除的 keys
+            const keysByLang = {};
+            this.localeOptions.forEach(opt => {
+                keysByLang[opt.value] = this.selected.map(item => item.key);
+            });
+            
+            // 从内存中删除
+            const language = this.designer.setupState.formOptions.language;
+            this.selected.forEach(item => {
+                this.localeOptions.forEach(opt => {
+                    if (language[opt.value]) {
+                        delete language[opt.value][item.key];
+                    }
+                });
+            });
+            
+            // 从列表中移除
+            this.selected.forEach(item => {
+                const idx = this.column.indexOf(item);
+                if (idx > -1) this.column.splice(idx, 1);
+            });
+            
+            // 持久化批量删除
+            if (this.persistEnabled) {
+                for (const [lang, keys] of Object.entries(keysByLang)) {
+                    await this.batchDeleteLocale(lang, keys);
+                }
+            }
+            await this.saveLocale();
+            
             this.selected = [];
         },
         selectionChange(list) {
@@ -252,20 +449,9 @@ export default defineComponent({
             return characters.charAt((this.uni++) % 26) + result;
         }
     },
-    mounted() {
-        const language = this.designer.setupState.formOptions.language || {};
-        const column = {};
-        Object.keys(language).forEach(lang => {
-            Object.keys(language[lang]).forEach(key => {
-                if (!column[key]) {
-                    column[key] = {
-                        key: key,
-                    }
-                }
-                column[key][lang] = language[lang][key];
-            })
-        });
-        this.column = Object.values(column);
+    async mounted() {
+        // 从后端加载语言包（系统启动时）
+        await this.loadLocale();
     }
 
 });

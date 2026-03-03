@@ -1,0 +1,11 @@
+{
+  "zh-cn": {
+    "TEST1": "测试 1 (已修改)",
+    "TEST2": "测试 2"
+  },
+  "en": {
+    "TEST1": "Test 1",
+    "TEST2": "Test 2",
+    "ROUTE_TEST": "路由测试"
+  }
+}
