@@ -4,14 +4,14 @@
         <div class="_fc-l-info">
             {{ t('warning.language') }}
         </div>
-        <!-- 搜索区域 -->
+        <!-- 搜索区域（左上） -->
         <div class="_fd-lc-search">
             <el-input
                 v-model="searchText"
                 :placeholder="t('language.searchPlaceholder')"
                 size="small"
                 clearable
-                style="width: 300px;"
+                style="width: 280px;"
                 @keyup.enter="handleSearch"
             >
                 <template #append>
@@ -187,7 +187,7 @@ export default defineComponent({
                 return this.column;
             }
             const search = this.searchText.toLowerCase();
-            return this.column.filter(row => {
+            const result = this.column.filter(row => {
                 // 搜索 Key
                 if (row.key && row.key.toLowerCase().includes(search)) {
                     return true;
@@ -196,13 +196,14 @@ export default defineComponent({
                 const localeOpts = this.localeOptions;
                 for (let i = 0; i < localeOpts.length; i++) {
                     const lang = localeOpts[i].value;
-                    const value = row[lang] || '';
-                    if (value.toLowerCase().includes(search)) {
+                    const value = row[lang];
+                    if (value && value.toLowerCase().includes(search)) {
                         return true;
                     }
                 }
                 return false;
             });
+            return result;
         },
         // 分页数据（基于过滤后的数据）
         paginatedData() {
@@ -565,7 +566,7 @@ export default defineComponent({
 ._fd-lc-search {
     margin-bottom: 12px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 
 ._fd-lc-header {
