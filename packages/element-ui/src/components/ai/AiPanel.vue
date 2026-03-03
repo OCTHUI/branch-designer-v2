@@ -207,7 +207,7 @@ export default {
             return this.designer.setupState.t;
         },
         api() {
-            return this.designer.props.config?.ai?.api || 'https://api.form-create.com/ai/v2/chat/form';
+            return this.designer.props.config?.ai?.api || 'http://localhost:3001/api/chat/completions';
         },
         token() {
             let token = this.designer.props.config?.ai?.token || '';
