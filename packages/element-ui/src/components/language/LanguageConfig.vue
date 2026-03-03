@@ -15,8 +15,10 @@
                 @keyup.enter="handleSearch"
             >
                 <template #append>
-                    <el-button @click="handleSearch">
-                        <i class="el-icon-search"></i>
+                    <el-button @click="handleSearch" class="_fd-search-btn">
+                        <svg class="_fd-search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L15.803 15.803M17.5 10.5C17.5 14.6421 14.1421 18 10 18C5.85786 18 2.5 14.6421 2.5 10.5C2.5 6.35786 5.85786 3 10 3C14.1421 3 17.5 6.35786 17.5 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </el-button>
                 </template>
             </el-input>
@@ -573,6 +575,20 @@ export default defineComponent({
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
+}
+
+/* 搜索按钮样式 */
+._fd-search-btn {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+._fd-search-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
 }
 
 ._fd-language-config .el-table__cell {
