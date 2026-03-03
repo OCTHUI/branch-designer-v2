@@ -64,7 +64,7 @@
             </template>
         </el-dialog>
         <div class="_fd-lc-body">
-            <el-table :data="column" size="small" ref="table"
+            <el-table :data="paginatedData" size="small" ref="table"
                       @selection-change="selectionChange" row-key="key">
                 <el-table-column type="selection" width="30px"></el-table-column>
                 <el-table-column prop="key" label="Key" width="90px"></el-table-column>
@@ -91,6 +91,19 @@
                     </template>
                 </el-table-column>
             </el-table>
+            
+            <!-- 分页 -->
+            <div class="_fd-lc-pagination">
+                <el-pagination
+                    v-model:current-page="currentPage"
+                    v-model:page-size="pageSize"
+                    :page-sizes="[50, 100, 200, 500]"
+                    :total="totalEntries"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                />
+            </div>
         </div>
     </div>
 
@@ -131,7 +144,30 @@ export default defineComponent({
             },
             importData: [],
             persistEnabled: false,
-            persistError: null
+            persistError: null,
+            // 分页
+            currentPage: 1,
+            pageSize: 50
+        }
+    },
+    computed: {
+        localeOptions() {
+            return this.designer.setupState.getConfig('localeOptions', [
+                {value: 'zh-cn', label: '简体中文'},
+                {value: 'en', label: 'English'},
+            ]);
+        },
+        t() {
+            return this.designer.setupState.t;
+        },
+        // 分页数据
+        paginatedData() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            return this.column.slice(start, end);
+        },
+        totalEntries() {
+            return this.column.length;
         }
     },
     methods: {
@@ -356,6 +392,16 @@ export default defineComponent({
                 });
             });
             this.column = Object.values(column);
+            // 刷新后重置到第一页
+            this.currentPage = 1;
+        },
+        // 分页处理
+        handleSizeChange(val) {
+            this.pageSize = val;
+            this.currentPage = 1;
+        },
+        handleCurrentChange(val) {
+            this.currentPage = val;
         },
         async saveColumn(row, input) {
             row.input = input || false;
@@ -375,8 +421,10 @@ export default defineComponent({
             await this.saveLocale();
         },
         async rmColumn(idx) {
-            const row = this.column[idx];
-            this.column.splice(idx, 1);
+            // 分页后需要计算真实索引
+            const realIdx = (this.currentPage - 1) * this.pageSize + idx;
+            const row = this.column[realIdx];
+            this.column.splice(realIdx, 1);
             const language = this.designer.setupState.formOptions.language;
             
             // 收集要删除的 keys
@@ -504,5 +552,12 @@ export default defineComponent({
     color: #606266;
     margin-bottom: 8px;
     font-weight: 500;
+}
+
+._fd-lc-pagination {
+    margin-top: 16px;
+    padding: 12px 0;
+    display: flex;
+    justify-content: flex-end;
 }
 </style>

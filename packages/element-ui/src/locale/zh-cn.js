@@ -322,6 +322,7 @@ const ZhCn = {
         simplifiedChinese: '简体中文',
         english: 'English',
         cancel: '取消',
+        pageTotal: '共 {total} 条',
         select: '选择多语言',
     },
     menu: {

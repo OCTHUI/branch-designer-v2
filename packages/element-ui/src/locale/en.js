@@ -322,6 +322,7 @@ const En = {
         simplifiedChinese: 'Simplified Chinese',
         english: 'English',
         cancel: 'Cancel',
+        pageTotal: '{total} entries',
         select: 'Select language',
     },
     menu: {
