@@ -180,18 +180,12 @@ export default defineComponent({
                 if (!response.ok) throw new Error('加载失败');
                 const data = await response.json();
                 
+                // 完全替换为后端数据（后端是唯一数据源）
                 const formOptions = this.designer.setupState.formOptions;
-                if (!formOptions.language) {
-                    formOptions.language = {};
-                }
+                formOptions.language = {};
                 
-                // 合并后端数据（保留 App.vue 初始化的数据）
                 Object.keys(data).forEach(lang => {
-                    if (!formOptions.language[lang]) {
-                        formOptions.language[lang] = {};
-                    }
-                    // 后端数据优先（确保删除操作生效）
-                    Object.assign(formOptions.language[lang], data[lang]);
+                    formOptions.language[lang] = { ...data[lang] };
                 });
                 
                 this.persistEnabled = true;
