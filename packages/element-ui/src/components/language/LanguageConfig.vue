@@ -144,18 +144,13 @@ export default defineComponent({
                 if (!response.ok) throw new Error('加载失败');
                 const data = await response.json();
                 
-                // 合并到 formOptions
+                // 替换 formOptions 中的语言包（不是合并，确保删除操作生效）
                 const formOptions = this.designer.setupState.formOptions;
-                if (!formOptions.language) {
-                    formOptions.language = {};
-                }
+                formOptions.language = {};
                 
-                // 合并自定义语言包
+                // 完全替换为后端数据
                 Object.keys(data).forEach(lang => {
-                    if (!formOptions.language[lang]) {
-                        formOptions.language[lang] = {};
-                    }
-                    Object.assign(formOptions.language[lang], data[lang]);
+                    formOptions.language[lang] = { ...data[lang] };
                 });
                 
                 this.persistEnabled = true;
