@@ -4,30 +4,33 @@
         <div class="_fc-l-info">
             {{ t('warning.language') }}
         </div>
-        <div class="_fd-lc-header">
-            <div class="_fd-lc-header-left">
-                <el-button size="small" @click="addColumn">{{ t('language.add') }}</el-button>
-                <el-button size="small" @click="openImportDialog">
-                    <i class="fc-icon icon-group"></i> {{ t('language.batchImport') }}
-                </el-button>
-                <el-button size="small" type="danger" plain :disabled="!selected.length" @click="batchRmColumn">
-                    {{ t('language.batchRemove') }}
-                </el-button>
-            </div>
-            <div class="_fd-lc-header-right">
-                <el-input
-                    v-model="searchText"
-                    :placeholder="t('language.searchPlaceholder')"
-                    size="small"
-                    clearable
-                    style="width: 200px;"
-                    @input="handleSearch"
-                >
-                    <template #prefix>
+        <!-- 搜索区域 -->
+        <div class="_fd-lc-search">
+            <el-input
+                v-model="searchText"
+                :placeholder="t('language.searchPlaceholder')"
+                size="small"
+                clearable
+                style="width: 300px;"
+                @keyup.enter="handleSearch"
+            >
+                <template #append>
+                    <el-button @click="handleSearch">
                         <i class="el-icon-search"></i>
-                    </template>
-                </el-input>
-            </div>
+                    </el-button>
+                </template>
+            </el-input>
+        </div>
+        
+        <!-- 按钮区域 -->
+        <div class="_fd-lc-header">
+            <el-button size="small" @click="addColumn">{{ t('language.add') }}</el-button>
+            <el-button size="small" @click="openImportDialog">
+                <i class="fc-icon icon-group"></i> {{ t('language.batchImport') }}
+            </el-button>
+            <el-button size="small" type="danger" plain :disabled="!selected.length" @click="batchRmColumn">
+                {{ t('language.batchRemove') }}
+            </el-button>
         </div>
         
         <!-- 批量导入对话框 -->
@@ -186,11 +189,13 @@ export default defineComponent({
             const search = this.searchText.toLowerCase();
             return this.column.filter(row => {
                 // 搜索 Key
-                if (row.key.toLowerCase().includes(search)) {
+                if (row.key && row.key.toLowerCase().includes(search)) {
                     return true;
                 }
                 // 搜索所有语言的值
-                for (const lang of this.localeOptions.map(o => o.value)) {
+                const localeOpts = this.localeOptions;
+                for (let i = 0; i < localeOpts.length; i++) {
+                    const lang = localeOpts[i].value;
                     const value = row[lang] || '';
                     if (value.toLowerCase().includes(search)) {
                         return true;
@@ -557,21 +562,16 @@ export default defineComponent({
     overflow: auto;
 }
 
+._fd-lc-search {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+
 ._fd-lc-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-._fd-lc-header-left {
-    display: flex;
     gap: 8px;
-}
-
-._fd-lc-header-right {
-    display: flex;
-    align-items: center;
+    margin-bottom: 12px;
 }
 
 ._fd-language-config .el-table__cell {
