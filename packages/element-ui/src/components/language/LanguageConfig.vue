@@ -7,7 +7,7 @@
         <div class="_fd-lc-header">
             <el-button size="small" @click="addColumn">{{ t('language.add') }}</el-button>
             <el-button size="small" @click="openImportDialog">
-                <i class="fc-icon icon-group"></i> 批量导入
+                <i class="fc-icon icon-group"></i> {{ t('language.batchImport') }}
             </el-button>
             <el-button size="small" type="danger" plain :disabled="!selected.length" @click="batchRmColumn">
                 {{ t('language.batchRemove') }}

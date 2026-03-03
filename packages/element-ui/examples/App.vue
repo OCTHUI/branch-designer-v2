@@ -18,8 +18,8 @@
                         </div>
                         <template #dropdown>
                             <el-dropdown-menu>
-                                <el-dropdown-item @click="setJson">导入JSON</el-dropdown-item>
-                                <el-dropdown-item @click="setOption">导入Options</el-dropdown-item>
+                                <el-dropdown-item @click="setJson">{{ t('language.importJson') }}</el-dropdown-item>
+                                <el-dropdown-item @click="setOption">{{ t('language.importOptions') }}</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
@@ -32,8 +32,8 @@
                         </div>
                         <template #dropdown>
                             <el-dropdown-menu>
-                                <el-dropdown-item @click="showJson">生成JSON</el-dropdown-item>
-                                <el-dropdown-item @click="showOption">生成Options</el-dropdown-item>
+                                <el-dropdown-item @click="showJson">{{ t('language.exportJson') }}</el-dropdown-item>
+                                <el-dropdown-item @click="showOption">{{ t('language.exportOptions') }}</el-dropdown-item>
                                 <el-dropdown-item @click="copyUrl">{{ t('language.exportPreviewUrl') }}</el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
