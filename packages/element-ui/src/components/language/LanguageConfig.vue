@@ -180,18 +180,23 @@ export default defineComponent({
                 if (!response.ok) throw new Error('加载失败');
                 const data = await response.json();
                 
-                // 替换 formOptions 中的语言包（不是合并，确保删除操作生效）
                 const formOptions = this.designer.setupState.formOptions;
-                formOptions.language = {};
+                if (!formOptions.language) {
+                    formOptions.language = {};
+                }
                 
-                // 完全替换为后端数据
+                // 合并后端数据（保留 App.vue 初始化的数据）
                 Object.keys(data).forEach(lang => {
-                    formOptions.language[lang] = { ...data[lang] };
+                    if (!formOptions.language[lang]) {
+                        formOptions.language[lang] = {};
+                    }
+                    // 后端数据优先（确保删除操作生效）
+                    Object.assign(formOptions.language[lang], data[lang]);
                 });
                 
                 this.persistEnabled = true;
                 this.refreshColumn();
-                console.log('🌍 语言包已从文件加载');
+                console.log('🌍 语言包已从文件加载，词条数:', this.column.length);
             } catch (error) {
                 console.warn('⚠️ 无法连接持久化服务，使用内存模式:', error.message);
                 this.persistEnabled = false;
