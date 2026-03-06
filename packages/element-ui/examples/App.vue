@@ -144,9 +144,10 @@ export default {
                 fieldReadonly: false,
                 showSaveBtn: true,
                 ai: {
-                    // 使用环境变量配置 AI 助理 API，避免敏感信息泄露
-                    api: process.env.VUE_APP_AI_API || 'http://localhost:3001/api/chat/completions',
-                    token: process.env.VUE_APP_AI_TOKEN || '',
+                    // 从环境变量读取 AI 配置，避免硬编码暴露 Token
+                    // Vite 项目使用 import.meta.env，变量需以 VITE_ 开头
+                    api: import.meta.env.VITE_AI_API || 'http://localhost:3001/api/chat/completions',
+                    token: import.meta.env.VITE_AI_TOKEN || '',
                 },
             },
             handle: [
