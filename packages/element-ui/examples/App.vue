@@ -135,7 +135,7 @@ export default {
             err: false,
             type: -1,
             autoSaveId: null,
-            lang: 'cn',
+            lang: this.lang,
             locale: null,
             menus: [],
             hashData,
@@ -143,6 +143,10 @@ export default {
                 autoActive: true,
                 fieldReadonly: false,
                 showSaveBtn: true,
+                ai: {
+                    api: 'http://localhost:3001/api/chat/completions',
+                    token: 'sk-8142c9231331479b974c8152d09efd09',
+                },
             },
             handle: [
                 {
