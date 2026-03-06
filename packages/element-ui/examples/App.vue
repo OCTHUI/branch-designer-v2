@@ -144,8 +144,9 @@ export default {
                 fieldReadonly: false,
                 showSaveBtn: true,
                 ai: {
-                    api: 'http://localhost:3001/api/chat/completions',
-                    token: 'sk-8142c9231331479b974c8152d09efd09',
+                    // 使用环境变量配置 AI 助理 API，避免敏感信息泄露
+                    api: process.env.VUE_APP_AI_API || 'http://localhost:3001/api/chat/completions',
+                    token: process.env.VUE_APP_AI_TOKEN || '',
                 },
             },
             handle: [
